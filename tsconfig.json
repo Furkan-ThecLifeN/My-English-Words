@@ -5,6 +5,7 @@
     "useDefineForClassFields": false,
     "module": "ESNext",
     "types": ["vite/client"],
+    "resolveJsonModule": true,
     "lib": [
       "ES2022",
       "DOM",
