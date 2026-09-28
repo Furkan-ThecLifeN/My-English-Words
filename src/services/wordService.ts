@@ -129,3 +129,38 @@ export function downloadWordsJson(words: Word[]) {
   downloadAnchor.click();
   downloadAnchor.remove();
 }
+
+export function importWordsJson(content: string): Word[] {
+  const parsed: unknown = JSON.parse(content);
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error('JSON dosyası boş olmayan bir kelime dizisi içermelidir.');
+  }
+
+  const importedWords = parsed.map((item, index): Word => {
+    if (typeof item !== 'object' || item === null || Array.isArray(item)) {
+      throw new Error(`${index + 1}. kelime kaydı geçersiz.`);
+    }
+
+    const record = item as Record<string, unknown>;
+    if (
+      typeof record.word !== 'string' || !record.word.trim() ||
+      typeof record.translation !== 'string' || !record.translation.trim() ||
+      typeof record.sentence !== 'string' || !record.sentence.trim()
+    ) {
+      throw new Error(`${index + 1}. kayıtta kelime, anlam ve örnek cümle alanları zorunludur.`);
+    }
+
+    return {
+      id: typeof record.id === 'string' || typeof record.id === 'number'
+        ? String(record.id)
+        : `${Date.now()}-${index}`,
+      word: record.word.trim(),
+      translation: record.translation.trim(),
+      sentence: record.sentence.trim(),
+      ...(typeof record.createdAt === 'number' ? { createdAt: record.createdAt } : {}),
+    };
+  });
+
+  saveLocalWords(importedWords);
+  return importedWords;
+}

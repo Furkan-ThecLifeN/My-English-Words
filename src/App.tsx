@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { Word, ThemeSettings } from './types';
-import { fetchWords, addWord, deleteWord, downloadWordsJson } from './services/wordService';
+import { fetchWords, addWord, deleteWord, downloadWordsJson, importWordsJson } from './services/wordService';
 import {
   DEFAULT_THEME,
   PRESET_THEMES,
@@ -22,6 +22,7 @@ import {
   Search,
   BookOpen,
   Download,
+  Upload,
   Check,
   Settings as SettingsIcon,
 } from 'lucide-react';
@@ -35,6 +36,7 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [notification, setNotification] = useState<string | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   // Custom Theme state with local persistence
   const [themeSettings, setThemeSettings] = useState<ThemeSettings>(() => {
@@ -127,6 +129,22 @@ export default function App() {
     await deleteWord(id);
     setWords((prev) => prev.filter((w) => w.id !== id));
     showToast('Kelime silindi.');
+  };
+
+  const handleImportWords = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const importedWords = importWordsJson(await file.text());
+      setWords(importedWords);
+      setSearchTerm('');
+      showToast(`${importedWords.length} kelime JSON dosyasından yüklendi.`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'JSON dosyası içe aktarılamadı.');
+    } finally {
+      event.target.value = '';
+    }
   };
 
   // Filtered words for instant search
@@ -247,6 +265,24 @@ export default function App() {
             >
               <Download className="w-3.5 h-3.5 text-slate-400" />
               <span>JSON İndir</span>
+            </button>
+
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={handleImportWords}
+              className="hidden"
+              aria-label="JSON dosyası seç"
+            />
+            <button
+              type="button"
+              onClick={() => importInputRef.current?.click()}
+              className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors text-xs font-medium"
+              title="JSON dosyasından kelimeleri içe aktar"
+            >
+              <Upload className="w-3.5 h-3.5 text-slate-400" />
+              <span className="hidden sm:inline">JSON Yükle</span>
             </button>
 
             {/* Kelime Ekle Button (Single '+' only!) */}
