@@ -78,67 +78,45 @@ function saveLocalWords(words: Word[]) {
 
 export async function fetchWords(): Promise<Word[]> {
   try {
-    const res = await fetch('/api/words');
+    // Önce tarayıcıda kayıtlı güncel veriler var mı bakıyoruz
+    const localList = getLocalWords();
+    if (localList && localList.length > 8) {
+      return localList;
+    }
+
+    // Vercel / public klasöründen 40 kelimelik güncel words.json dosyasını çekiyoruz
+    const res = await fetch('/words.json');
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         saveLocalWords(data);
         return data;
       }
     }
   } catch (err) {
-    console.info('Backend API erişilemedi, LocalStorage verisi kullanılıyor:', err);
+    console.info('words.json yüklenemedi, LocalStorage verisi kullanılıyor:', err);
   }
   return getLocalWords();
 }
 
 export async function addWord(payload: { word: string; translation: string; sentence: string }): Promise<Word> {
   const localList = getLocalWords();
-  const fallbackWord: Word = {
+  const newWord: Word = {
     id: Date.now().toString(),
     word: payload.word.trim(),
     translation: payload.translation.trim(),
     sentence: payload.sentence.trim(),
   };
 
-  try {
-    const res = await fetch('/api/words', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (res.ok) {
-      const savedWord = await res.json();
-      const updated = [savedWord, ...localList.filter((w) => w.id !== savedWord.id)];
-      saveLocalWords(updated);
-      return savedWord;
-    }
-  } catch (err) {
-    console.info('Backend API çağrısı yapılamadı, yerel olarak kaydediliyor:', err);
-  }
-
-  // Fallback to local storage
-  const updated = [fallbackWord, ...localList];
+  const updated = [newWord, ...localList];
   saveLocalWords(updated);
-  return fallbackWord;
+  return newWord;
 }
 
 export async function deleteWord(id: string): Promise<boolean> {
   const localList = getLocalWords();
   const updated = localList.filter((w) => w.id !== id);
   saveLocalWords(updated);
-
-  try {
-    await fetch(`/api/words/${id}`, {
-      method: 'DELETE',
-    });
-  } catch (err) {
-    console.info('Backend silme işlemi yapılamadı:', err);
-  }
-
   return true;
 }
 

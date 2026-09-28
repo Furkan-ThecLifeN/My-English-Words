@@ -15,7 +15,7 @@ export const DEFAULT_THEME: ThemeSettings = {
 
   cardBgType: 'solid',
   cardBgColor: '#ffffff',
-  cardBgGradientColor1: '#ffffff',
+  cardBgGradientColor1: '#552828',
   cardBgGradientColor2: '#f8fafc',
   cardBgGradientAngle: 180,
   cardBorderColor: '#e2e8f0',
