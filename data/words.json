@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "word": "purchase",
+    "translation": "satın almak",
+    "sentence": "I want to purchase a new laptop."
+  },
+  {
+    "id": "2",
+    "word": "improve",
+    "translation": "geliştirmek",
+    "sentence": "I want to improve my English speaking skills."
+  },
+  {
+    "id": "3",
+    "word": "achieve",
+    "translation": "başarmak, elde etmek",
+    "sentence": "You can achieve your goals if you practice consistently."
+  },
+  {
+    "id": "4",
+    "word": "consider",
+    "translation": "göz önünde bulundurmak, düşünmek",
+    "sentence": "Please consider all options before making a final decision."
+  },
+  {
+    "id": "5",
+    "word": "opportunity",
+    "translation": "fırsat, imkan",
+    "sentence": "This job offer is a great opportunity for your career."
+  },
+  {
+    "id": "6",
+    "word": "essential",
+    "translation": "temel, zorunlu, gerekli",
+    "sentence": "Consistent practice is essential to learn any language."
+  },
+  {
+    "id": "7",
+    "word": "discover",
+    "translation": "keşfetmek",
+    "sentence": "They traveled around the world to discover new cultures."
+  },
+  {
+    "id": "8",
+    "word": "challenge",
+    "translation": "zorluk, meydan okuma",
+    "sentence": "Learning a new skill is always an exciting challenge."
+  }
+]

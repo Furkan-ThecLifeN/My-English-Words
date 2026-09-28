@@ -1,0 +1,6 @@
+{
+  "name": "My English Words",
+  "description": "Kişisel, sade ve responsive İngilizce kelime öğrenme uygulaması. 3D flip kartlar, örnek cümleler ve JSON tabanlı kalıcı veri saklama.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
