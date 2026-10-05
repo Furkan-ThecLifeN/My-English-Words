@@ -1,0 +1,368 @@
+[
+  {
+    "id": "1",
+    "word": "Topside",
+    "translation": "Güverte üstü, üst kısım",
+    "sentence": "The sailors were ordered to return topside immediately."
+  },
+  {
+    "id": "2",
+    "word": "Don't get compromised",
+    "translation": "Güvenliğini tehlikeye atma, ele geçirilme",
+    "sentence": "Don't get compromised during the operation."
+  },
+  {
+    "id": "3",
+    "word": "Keep it up",
+    "translation": "Aynen devam, çok iyi gidiyorsun, böyle devam et",
+    "sentence": "Keep it up, you're doing great."
+  },
+  {
+    "id": "4",
+    "word": "Dropped one",
+    "translation": "Birini düşürdü, birini kaybetti",
+    "sentence": "I dropped one while carrying the boxes."
+  },
+  {
+    "id": "5",
+    "word": "Bloody hell",
+    "translation": "Kahretsin, vay canına",
+    "sentence": "Bloody hell, that was close."
+  },
+  {
+    "id": "6",
+    "word": "In contact",
+    "translation": "İletişimde, irtibatta",
+    "sentence": "Let's stay in contact."
+  },
+  {
+    "id": "7",
+    "word": "Distraction",
+    "translation": "Dikkat dağıtıcı şey, dikkat dağılması",
+    "sentence": "Please turn off your phone to avoid any distractions while studying."
+  },
+  {
+    "id": "8",
+    "word": "Down the alley",
+    "translation": "Sokağın ilerisinde, yolun devamında",
+    "sentence": "The cafe is just down the alley."
+  },
+  {
+    "id": "9",
+    "word": "Rendezvous",
+    "translation": "Buluşma noktası, buluşma",
+    "sentence": "We have a rendezvous at midnight."
+  },
+  {
+    "id": "10",
+    "word": "Hostile",
+    "translation": "Düşman, düşmanca",
+    "sentence": "The area is hostile and heavily guarded."
+  },
+  {
+    "id": "11",
+    "word": "Extract",
+    "translation": "Tahliye etmek, çıkarmak",
+    "sentence": "We need to extract the team before dark."
+  },
+  {
+    "id": "12",
+    "word": "Perimeter",
+    "translation": "Çevre, güvenlik hattı",
+    "sentence": "Secure the perimeter."
+  },
+  {
+    "id": "13",
+    "word": "Inbound",
+    "translation": "Gelmekte olan, yaklaşan",
+    "sentence": "Enemy forces are inbound."
+  },
+  {
+    "id": "14",
+    "word": "Remastered",
+    "translation": "Yeniden düzenlenmiş, yeniden yapılmış",
+    "sentence": "I played the remastered version of the game."
+  },
+  {
+    "id": "15",
+    "word": "Campaign",
+    "translation": "Senaryo, harekât",
+    "sentence": "The campaign tells the story of a special forces unit."
+  },
+  {
+    "id": "16",
+    "word": "Combat",
+    "translation": "Çatışma, muharebe",
+    "sentence": "The soldiers were prepared for combat."
+  },
+  {
+    "id": "17",
+    "word": "Tactical",
+    "translation": "Taktiksel",
+    "sentence": "We need a tactical approach."
+  },
+  {
+    "id": "18",
+    "word": "Radio",
+    "translation": "Telsiz, radyo",
+    "sentence": "The commander spoke over the radio."
+  },
+  {
+    "id": "19",
+    "word": "Operations",
+    "translation": "Operasyonlar",
+    "sentence": "The team is ready for operations."
+  },
+  {
+    "id": "20",
+    "word": "Command",
+    "translation": "Komuta, emir",
+    "sentence": "Follow the command."
+  },
+  {
+    "id": "21",
+    "word": "Cinematic",
+    "translation": "Sinematik",
+    "sentence": "The game has cinematic story scenes."
+  },
+  {
+    "id": "22",
+    "word": "whether",
+    "translation": "ikisinden biri, olup olmadığı",
+    "sentence": "I don't know whether he will come to the party."
+  },
+  {
+    "id": "23",
+    "word": "signed",
+    "translation": "imzalı, imzalanmış",
+    "sentence": "The contract was signed by both parties yesterday."
+  },
+  {
+    "id": "24",
+    "word": "confidential",
+    "translation": "gizli, mahrem",
+    "sentence": "Please keep this document in a safe place, it is strictly confidential."
+  },
+  {
+    "id": "25",
+    "word": "defending",
+    "translation": "savunan, savunma yapan",
+    "sentence": "The defending champion played brilliantly in the final match."
+  },
+  {
+    "id": "26",
+    "word": "loyalty",
+    "translation": "sadakat, bağlılık",
+    "sentence": "Dogs are well known for their loyalty to their owners."
+  },
+  {
+    "id": "27",
+    "word": "tournament",
+    "translation": "turnuva",
+    "sentence": "Our school's basketball team won the tournament this year."
+  },
+  {
+    "id": "28",
+    "word": "upcoming",
+    "translation": "yaklaşan, gelmekte olan",
+    "sentence": "She is studying very hard for the upcoming exams."
+  },
+  {
+    "id": "29",
+    "word": "military",
+    "translation": "askeri, ordu",
+    "sentence": "He decided to join the military after graduating from high school."
+  },
+  {
+    "id": "30",
+    "word": "maintenance",
+    "translation": "bakım, onarım",
+    "sentence": "Regular car maintenance is essential for your safety on the road."
+  },
+  {
+    "id": "31",
+    "word": "Rules",
+    "translation": "Kurallar",
+    "sentence": "You must follow the school rules."
+  },
+  {
+    "id": "32",
+    "word": "Founder",
+    "translation": "Kurucu",
+    "sentence": "He is the founder of this successful gaming community."
+  },
+  {
+    "id": "33",
+    "word": "Head honcho",
+    "translation": "Patron, Reis, En yetkili kişi",
+    "sentence": "The head honcho will decide who joins the team next."
+  },
+  {
+    "id": "34",
+    "word": "Absolute",
+    "translation": "Mutlak, Kesin",
+    "sentence": "The leader has absolute power over all crew decisions."
+  },
+  {
+    "id": "35",
+    "word": "Permissions",
+    "translation": "İzinler, Yetkiler",
+    "sentence": "You need special permissions to invite new players."
+  },
+  {
+    "id": "36",
+    "word": "Commissioners",
+    "translation": "Komiserler, Özel Yetkililer",
+    "sentence": "Commissioners can manage the crew on behalf of the leader."
+  },
+  {
+    "id": "37",
+    "word": "Trusted",
+    "translation": "Güvenilir",
+    "sentence": "He is the most trusted member of our team."
+  },
+  {
+    "id": "38",
+    "word": "Promote",
+    "translation": "Rütbe vermek, Terfi ettirmek",
+    "sentence": "The leader decided to promote him to lieutenant."
+  },
+  {
+    "id": "39",
+    "word": "Lieutenants",
+    "translation": "Teğmenler, Yardımcılar",
+    "sentence": "Lieutenants have specific privileges to keep the crew in check."
+  },
+  {
+    "id": "40",
+    "word": "Privileges",
+    "translation": "Ayrıcalıklar",
+    "sentence": "Higher ranks come with more privileges in the game."
+  },
+  {
+    "id": "41",
+    "word": "Representatives",
+    "translation": "Temsilciler",
+    "sentence": "Representatives help with recruitment efforts."
+  },
+  {
+    "id": "42",
+    "word": "Commitment",
+    "translation": "Bağlılık, Sadakat",
+    "sentence": "They proved their commitment by playing every day."
+  },
+  {
+    "id": "43",
+    "word": "Recruitment",
+    "translation": "Üye alımı, İşe alım",
+    "sentence": "Our crew is focusing on the recruitment of new talents."
+  },
+  {
+    "id": "44",
+    "word": "Muscle",
+    "translation": "Kas gücü, Ayak takımı / Tetikçi",
+    "sentence": "The muscle may not have power, but they are the heart of the crew."
+  },
+  {
+    "id": "45",
+    "word": "Rank-and-file",
+    "translation": "Sıradan üyeler, Erler",
+    "sentence": "The rank-and-file members always follow the orders."
+  },
+  {
+    "id": "46",
+    "word": "Fearsome",
+    "translation": "Korkutucu, Heybetli",
+    "sentence": "Their aggressive tactics make them a fearsome team."
+  },
+  {
+    "id": "47",
+    "word": "Pending Requests",
+    "translation": "Bekleyen İstekler",
+    "sentence": "There are currently no pending requests to join the crew."
+  },
+  {
+    "id": "48",
+    "word": "Banned",
+    "translation": "Yasaklı, Engellenmiş",
+    "sentence": "Banned players cannot re-enter the lobby."
+  },
+  {
+    "id": "49",
+    "word": "Traitors",
+    "translation": "Hainler",
+    "sentence": "Those traitors were kicked out for breaking the rules."
+  },
+  {
+    "id": "50",
+    "word": "Decide",
+    "translation": "Karar vermek",
+    "sentence": "You must decide whether you want to join us or not."
+  },
+  {
+    "id": "51",
+    "word": "Decisions",
+    "translation": "Kararlar",
+    "sentence": "Important decisions are always made by the crew leader."
+  },
+  {
+    "id": "52",
+    "word": "Manage",
+    "translation": "Yönetmek, İdare etmek",
+    "sentence": "She knows how to manage a large group of players."
+  },
+  {
+    "id": "53",
+    "word": "Behalf",
+    "translation": "Adına, Namına",
+    "sentence": "The assistant signed the document on behalf of the boss."
+  },
+  {
+    "id": "54",
+    "word": "Keep",
+    "translation": "Tutmak, Korumak, Saklamak",
+    "sentence": "You should keep your password safe and confidential."
+  },
+  {
+    "id": "55",
+    "word": "Higher",
+    "translation": "Daha yüksek",
+    "sentence": "You need a higher rank to unlock these elite weapons."
+  },
+  {
+    "id": "56",
+    "word": "Recruitment efforts",
+    "translation": "Üye alımı çalışmaları",
+    "sentence": "Our recruitment efforts helped us find five new players."
+  },
+  {
+    "id": "57",
+    "word": "Proved",
+    "translation": "Kanıtladı, İspat etti",
+    "sentence": "He proved his loyalty by defending the crew's base."
+  },
+  {
+    "id": "58",
+    "word": "Talents",
+    "translation": "Yetenekler",
+    "sentence": "The team is looking for new talents for the upcoming tournament."
+  },
+  {
+    "id": "59",
+    "word": "Orders",
+    "translation": "Emirler, Siparişler",
+    "sentence": "In the military, you must follow the captain's orders."
+  },
+  {
+    "id": "60",
+    "word": "Currently",
+    "translation": "Şu anda, Mevcut durumda",
+    "sentence": "The game servers are currently offline for maintenance."
+  },
+  {
+    "id": "61",
+    "word": "Take cover",
+    "translation": "Siper almak, Sığınmak",
+    "sentence": "The soldiers had to take cover when the enemy started firing."
+  }
+]
