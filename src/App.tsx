@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { Word, ThemeSettings } from './types';
-import { fetchWords, addWord, deleteWord, downloadWordsJson, importWordsJson } from './services/wordService';
+import { fetchWords, addWord, deleteWord, downloadWordsJson, importWordsJson, replaceWords } from './services/wordService';
 import {
   DEFAULT_THEME,
   PRESET_THEMES,
@@ -15,6 +15,7 @@ import {
 import { WordCard } from './components/WordCard';
 import { AddWordModal } from './components/AddWordModal';
 import { SettingsModal } from './components/SettingsModal';
+import { WordQuiz } from './components/WordQuiz';
 import {
   Plus,
   Sun,
@@ -25,6 +26,7 @@ import {
   Upload,
   Check,
   Settings as SettingsIcon,
+  Gamepad2,
 } from 'lucide-react';
 
 const THEME_STORAGE_KEY = 'my_english_words_custom_theme_v2';
@@ -35,6 +37,7 @@ export default function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeView, setActiveView] = useState<'words' | 'quiz'>('words');
   const [notification, setNotification] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
@@ -120,15 +123,23 @@ export default function App() {
   };
 
   const handleAddWord = async (newWordData: { word: string; translation: string; sentence: string }) => {
-    const saved = await addWord(newWordData);
-    setWords((prev) => [saved, ...prev.filter((w) => w.id !== saved.id)]);
-    showToast('Yeni kelime başarıyla eklendi!');
+    try {
+      const saved = await addWord(newWordData);
+      setWords((prev) => [saved, ...prev.filter((w) => w.id !== saved.id)]);
+      showToast('Yeni kelime başarıyla kaydedildi.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Kelime kaydedilemedi.');
+    }
   };
 
   const handleDeleteWord = async (id: string) => {
-    await deleteWord(id);
-    setWords((prev) => prev.filter((w) => w.id !== id));
-    showToast('Kelime silindi.');
+    try {
+      await deleteWord(id);
+      setWords((prev) => prev.filter((w) => w.id !== id));
+      showToast('Kelime silindi.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Kelime silinemedi.');
+    }
   };
 
   const handleImportWords = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,9 +148,10 @@ export default function App() {
 
     try {
       const importedWords = importWordsJson(await file.text());
-      setWords(importedWords);
+      const savedWords = await replaceWords(importedWords);
+      setWords(savedWords);
       setSearchTerm('');
-      showToast(`${importedWords.length} kelime JSON dosyasından yüklendi.`);
+      showToast(`${savedWords.length} kelime yüklendi ve mevcut liste değiştirildi.`);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'JSON dosyası içe aktarılamadı.');
     } finally {
@@ -301,6 +313,29 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div role="tablist" aria-label="Uygulama bölümleri" className="mb-7 inline-flex rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeView === 'words'}
+            onClick={() => setActiveView('words')}
+            className={`inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors ${activeView === 'words' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`}
+          >
+            <BookOpen className="h-4 w-4" /> Kelimeler
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeView === 'quiz'}
+            onClick={() => setActiveView('quiz')}
+            className={`inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors ${activeView === 'quiz' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`}
+          >
+            <Gamepad2 className="h-4 w-4" /> Kelime Oyunu
+          </button>
+        </div>
+
+        {activeView === 'quiz' ? <WordQuiz words={words} /> : (
+        <>
         {/* Search & Filter Bar */}
         <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
@@ -386,6 +421,8 @@ export default function App() {
               </button>
             )}
           </div>
+        )}
+        </>
         )}
       </main>
 

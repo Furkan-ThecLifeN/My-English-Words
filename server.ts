@@ -7,8 +7,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DATA_DIR = path.join(__dirname, 'data');
-const DATA_FILE = path.join(DATA_DIR, 'words.json');
+const DATA_FILE = path.join(__dirname, 'public', 'words.json');
 
 const INITIAL_WORDS = [
   {
@@ -62,9 +61,6 @@ const INITIAL_WORDS = [
 ];
 
 function ensureDataFile() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
   if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, JSON.stringify(INITIAL_WORDS, null, 2), 'utf-8');
   }
@@ -125,6 +121,55 @@ async function startServer() {
     } catch (error) {
       console.error('Error writing words.json:', error);
       res.status(500).json({ error: 'Yeni kelime kaydedilemedi.' });
+    }
+  });
+
+  app.put('/api/words', (req, res) => {
+    try {
+      if (!Array.isArray(req.body) || req.body.length === 0) {
+        return res.status(400).json({ error: 'JSON boş olmayan bir kelime dizisi içermelidir.' });
+      }
+      const ids = new Set<string>();
+      const words = req.body.map((item: any, index: number) => {
+        if (
+          !item || typeof item !== 'object' ||
+          typeof item.word !== 'string' || !item.word.trim() ||
+          typeof item.translation !== 'string' || !item.translation.trim() ||
+          typeof item.sentence !== 'string' || !item.sentence.trim()
+        ) throw new Error(`${index + 1}. kelime kaydı geçersiz.`);
+
+        let id = typeof item.id === 'string' || typeof item.id === 'number' ? String(item.id).trim() : '';
+        if (!id || ids.has(id)) id = `${Date.now()}-${index}`;
+        while (ids.has(id)) id = `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`;
+        ids.add(id);
+        return {
+          id,
+          word: item.word.trim(),
+          translation: item.translation.trim(),
+          sentence: item.sentence.trim(),
+          ...(typeof item.createdAt === 'number' ? { createdAt: item.createdAt } : {}),
+        };
+      });
+      fs.writeFileSync(DATA_FILE, JSON.stringify(words, null, 2), 'utf-8');
+      return res.json(words);
+    } catch (error) {
+      return res.status(400).json({ error: error instanceof Error ? error.message : 'JSON kaydedilemedi.' });
+    }
+  });
+
+  app.delete('/api/words', (req, res) => {
+    const id = typeof req.query.id === 'string' ? req.query.id : '';
+    if (!id) return res.status(400).json({ error: 'Silinecek kelime kimliği eksik.' });
+    try {
+      ensureDataFile();
+      const content = fs.readFileSync(DATA_FILE, 'utf-8');
+      const words = JSON.parse(content);
+      const filtered = words.filter((word: { id: string }) => word.id !== id);
+      fs.writeFileSync(DATA_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+      return res.json({ success: true, count: filtered.length });
+    } catch (error) {
+      console.error('Error deleting word:', error);
+      return res.status(500).json({ error: 'Kelime silinemedi.' });
     }
   });
 
