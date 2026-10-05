@@ -1,66 +1,48 @@
 import { Word } from '../types';
 
-const WRITE_TOKEN_KEY = 'my_english_words_write_token';
-
-function getWriteHeaders(): Record<string, string> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (import.meta.env.DEV) return headers;
-
-  let token = sessionStorage.getItem(WRITE_TOKEN_KEY);
-  if (!token) {
-    token = window.prompt('Kelime listesini değiştirmek için WORDS_WRITE_TOKEN anahtarını girin:')?.trim() ?? '';
-    if (!token) throw new Error('İşlem iptal edildi.');
-    sessionStorage.setItem(WRITE_TOKEN_KEY, token);
-  }
-  headers.Authorization = `Bearer ${token}`;
-  return headers;
-}
-
-function clearWriteTokenAfterUnauthorized(response: Response) {
-  if (response.status === 401) sessionStorage.removeItem(WRITE_TOKEN_KEY);
-}
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export async function fetchWords(): Promise<Word[]> {
-  try {
-    const response = await fetch('/api/words', { cache: 'no-store' });
-    if (!response.ok) throw new Error('Kelime API isteği başarısız oldu.');
-    return await response.json() as Word[];
-  } catch (err) {
-    console.warn('API kullanılamadı, public/words.json okunuyor:', err);
-    const response = await fetch('/words.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error('Kelime dosyası yüklenemedi.');
-    return await response.json() as Word[];
-  }
+  const response = await fetch('/api/words', { cache: 'no-store' });
+  if (!response.ok) throw new Error(await getApiError(response));
+  return await response.json() as Word[];
 }
 
 export async function addWord(payload: { word: string; translation: string; sentence: string }): Promise<Word> {
   const response = await fetch('/api/words', {
     method: 'POST',
-    headers: getWriteHeaders(),
+    headers: JSON_HEADERS,
     body: JSON.stringify(payload),
   });
-  clearWriteTokenAfterUnauthorized(response);
   if (!response.ok) throw new Error(await getApiError(response));
   return await response.json() as Word;
 }
 
 export async function deleteWord(id: string): Promise<boolean> {
-  const response = await fetch(`/api/words?id=${encodeURIComponent(id)}`, {
+  const response = await fetch(`/api/words/${encodeURIComponent(id)}`, {
     method: 'DELETE',
-    headers: getWriteHeaders(),
+    headers: JSON_HEADERS,
   });
-  clearWriteTokenAfterUnauthorized(response);
   if (!response.ok) throw new Error(await getApiError(response));
   return true;
+}
+
+export async function updateWord(id: string, payload: { word: string; translation: string; sentence: string }): Promise<Word> {
+  const response = await fetch(`/api/words/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) throw new Error(await getApiError(response));
+  return await response.json() as Word;
 }
 
 export async function replaceWords(words: Word[]): Promise<Word[]> {
   const response = await fetch('/api/words', {
     method: 'PUT',
-    headers: getWriteHeaders(),
+    headers: JSON_HEADERS,
     body: JSON.stringify(words),
   });
-  clearWriteTokenAfterUnauthorized(response);
   if (!response.ok) throw new Error(await getApiError(response));
   return await response.json() as Word[];
 }

@@ -1,5 +1,7 @@
+import { access, readFile, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { list, put } from '@vercel/blob';
-import words from '../public/words.json';
+import seedWords from '../data/words.json';
 
 type WordRecord = {
   id: string;
@@ -8,6 +10,12 @@ type WordRecord = {
   sentence: string;
   createdAt?: number;
 };
+
+const localWordsPath = resolve(process.cwd(), 'data', 'words.local.json');
+
+function usesLocalStore(): boolean {
+  return process.env.VERCEL !== '1' && !process.env.BLOB_READ_WRITE_TOKEN;
+}
 
 function validateWords(value: unknown): WordRecord[] | null {
   if (!Array.isArray(value)) return null;
@@ -41,6 +49,14 @@ function validateWords(value: unknown): WordRecord[] | null {
 }
 
 async function readStoredWords(): Promise<WordRecord[] | null> {
+  if (usesLocalStore()) {
+    try {
+      return validateWords(JSON.parse(await readFile(localWordsPath, 'utf8')));
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+      throw error;
+    }
+  }
   if (!process.env.BLOB_READ_WRITE_TOKEN) return null;
   const { blobs } = await list({ prefix: 'words.json', limit: 10 });
   const storedBlob = blobs.find((blob) => blob.pathname === 'words.json');
@@ -50,7 +66,24 @@ async function readStoredWords(): Promise<WordRecord[] | null> {
   return validateWords(await response.json());
 }
 
+async function hasCompletedSeedMigration(): Promise<boolean> {
+  if (usesLocalStore()) {
+    try {
+      await access(localWordsPath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  const { blobs } = await list({ prefix: 'words-migration-v1.json', limit: 10 });
+  return blobs.some((blob) => blob.pathname === 'words-migration-v1.json');
+}
+
 async function saveWords(wordsToSave: WordRecord[]): Promise<void> {
+  if (usesLocalStore()) {
+    await writeFile(localWordsPath, JSON.stringify(wordsToSave, null, 2), 'utf8');
+    return;
+  }
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     throw new Error('Vercel Blob deposu bağlı değil. BLOB_READ_WRITE_TOKEN ayarlanmalıdır.');
   }
@@ -62,24 +95,38 @@ async function saveWords(wordsToSave: WordRecord[]): Promise<void> {
   });
 }
 
-function authorizeWrite(request: any, response: any): boolean {
-  const token = process.env.WORDS_WRITE_TOKEN;
-  if (!token) {
-    response.status(503).json({ error: 'Vercel ortamında WORDS_WRITE_TOKEN ayarlanmalıdır.' });
-    return false;
+async function initializeWords(): Promise<WordRecord[]> {
+  const storedWords = await readStoredWords();
+  if (await hasCompletedSeedMigration()) return storedWords ?? [];
+
+  const mergedWords = [...(storedWords ?? [])];
+  const existingWords = new Set(mergedWords.map((item) => item.word.toLocaleLowerCase('en')));
+  for (const seedWord of validateWords(seedWords) ?? []) {
+    const normalizedWord = seedWord.word.toLocaleLowerCase('en');
+    if (!existingWords.has(normalizedWord)) {
+      mergedWords.push(seedWord);
+      existingWords.add(normalizedWord);
+    }
   }
-  if (request.headers?.authorization !== `Bearer ${token}`) {
-    response.status(401).json({ error: 'Yazma anahtarı geçersiz veya eksik.' });
-    return false;
-  }
-  return true;
+
+  await saveWords(mergedWords);
+  await put('words-migration-v1.json', '{}', {
+    access: 'public',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: 'application/json; charset=utf-8',
+  });
+  return mergedWords;
 }
 
 export default async function handler(request: any, response: any) {
+  if (!usesLocalStore() && !process.env.BLOB_READ_WRITE_TOKEN) {
+    return response.status(503).json({ error: 'Vercel Blob bağlı değil. BLOB_READ_WRITE_TOKEN ayarlanmalıdır.' });
+  }
+
   if (request.method === 'GET') {
     try {
-      const storedWords = await readStoredWords();
-      return response.status(200).json(storedWords ?? words);
+      return response.status(200).json(await initializeWords());
     } catch (error) {
       console.error('Error reading stored words:', error);
       return response.status(500).json({ error: 'Kelime verileri okunamadı.' });
@@ -87,9 +134,41 @@ export default async function handler(request: any, response: any) {
   }
 
   if (request.method === 'PUT') {
-    if (!authorizeWrite(request, response)) return;
+    const id = typeof request.params?.id === 'string'
+      ? request.params.id
+      : typeof request.query?.id === 'string' ? request.query.id : '';
+    if (id) {
+      const incoming = request.body as Record<string, unknown>;
+      if (
+        typeof incoming?.word !== 'string' || !incoming.word.trim() ||
+        typeof incoming?.translation !== 'string' || !incoming.translation.trim() ||
+        typeof incoming?.sentence !== 'string' || !incoming.sentence.trim()
+      ) return response.status(400).json({ error: 'Kelime, anlam ve örnek cümle zorunludur.' });
+
+      try {
+        const currentWords = await initializeWords();
+        const index = currentWords.findIndex((item) => item.id === id);
+        if (index < 0) return response.status(404).json({ error: 'Düzenlenecek kelime bulunamadı.' });
+        const updatedWord = {
+          ...currentWords[index],
+          word: incoming.word.trim(),
+          translation: incoming.translation.trim(),
+          sentence: incoming.sentence.trim(),
+        };
+        const duplicate = currentWords.some((item, itemIndex) =>
+          itemIndex !== index && item.word.toLocaleLowerCase('en') === updatedWord.word.toLocaleLowerCase('en'));
+        if (duplicate) return response.status(409).json({ error: 'Bu kelime listede zaten bulunuyor.' });
+        currentWords[index] = updatedWord;
+        await saveWords(currentWords);
+        return response.status(200).json(updatedWord);
+      } catch (error) {
+        console.error('Error updating word:', error);
+        return response.status(503).json({ error: error instanceof Error ? error.message : 'Kelime güncellenemedi.' });
+      }
+    }
+
     const importedWords = validateWords(request.body);
-    if (!importedWords?.length) {
+    if (!importedWords?.length || new Set(importedWords.map((item) => item.word.toLocaleLowerCase('en'))).size !== importedWords.length) {
       return response.status(400).json({ error: 'JSON boş olmayan, geçerli bir kelime dizisi içermelidir.' });
     }
     try {
@@ -102,23 +181,30 @@ export default async function handler(request: any, response: any) {
   }
 
   if (request.method === 'POST') {
-    if (!authorizeWrite(request, response)) return;
     const incoming = request.body as Record<string, unknown>;
     if (
       typeof incoming?.word !== 'string' || !incoming.word.trim() ||
       typeof incoming?.translation !== 'string' || !incoming.translation.trim() ||
       typeof incoming?.sentence !== 'string' || !incoming.sentence.trim()
     ) return response.status(400).json({ error: 'Kelime, anlam ve örnek cümle zorunludur.' });
-    const newWord: WordRecord = {
-      id: `${Date.now()}`,
-      word: incoming.word.trim(),
-      translation: incoming.translation.trim(),
-      sentence: incoming.sentence.trim(),
-    };
     try {
-      const currentWords = await readStoredWords() ?? words;
-      const validated = validateWords(currentWords);
-      await saveWords([newWord, ...(validated ?? [])]);
+      const currentWords = await initializeWords();
+      const word = incoming.word.trim();
+      if (currentWords.some((item) => item.word.toLocaleLowerCase('en') === word.toLocaleLowerCase('en'))) {
+        return response.status(409).json({ error: 'Bu kelime listede zaten bulunuyor.' });
+      }
+      const highestId = currentWords.reduce((highest, item) => {
+        if (!/^\d+$/.test(item.id)) return highest;
+        const numericId = Number(item.id);
+        return Number.isSafeInteger(numericId) ? Math.max(highest, numericId) : highest;
+      }, 0);
+      const newWord: WordRecord = {
+        id: String(highestId + 1),
+        word,
+        translation: incoming.translation.trim(),
+        sentence: incoming.sentence.trim(),
+      };
+      await saveWords([newWord, ...currentWords]);
       return response.status(201).json(newWord);
     } catch (error) {
       console.error('Error adding word:', error);
@@ -127,12 +213,16 @@ export default async function handler(request: any, response: any) {
   }
 
   if (request.method === 'DELETE') {
-    if (!authorizeWrite(request, response)) return;
-    const id = typeof request.query?.id === 'string' ? request.query.id : '';
+    const id = typeof request.params?.id === 'string'
+      ? request.params.id
+      : typeof request.query?.id === 'string' ? request.query.id : '';
     if (!id) return response.status(400).json({ error: 'Silinecek kelime kimliği eksik.' });
     try {
-      const currentWords = await readStoredWords() ?? words;
-      const updatedWords = validateWords(currentWords)?.filter((item) => item.id !== id) ?? [];
+      const currentWords = await initializeWords();
+      if (!currentWords.some((item) => item.id === id)) {
+        return response.status(404).json({ error: 'Silinecek kelime bulunamadı.' });
+      }
+      const updatedWords = currentWords.filter((item) => item.id !== id);
       await saveWords(updatedWords);
       return response.status(200).json({ success: true, count: updatedWords.length });
     } catch (error) {

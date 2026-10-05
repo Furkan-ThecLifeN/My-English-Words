@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { Word, ThemeSettings } from './types';
-import { fetchWords, addWord, deleteWord, downloadWordsJson, importWordsJson, replaceWords } from './services/wordService';
+import { fetchWords, addWord, updateWord, deleteWord, downloadWordsJson, importWordsJson, replaceWords } from './services/wordService';
 import {
   DEFAULT_THEME,
   PRESET_THEMES,
@@ -35,6 +35,7 @@ export default function App() {
   const [words, setWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeView, setActiveView] = useState<'words' | 'quiz'>('words');
@@ -108,6 +109,7 @@ export default function App() {
         setWords(data);
       } catch (err) {
         console.error('Kelime verileri yüklenirken hata:', err);
+        showToast(err instanceof Error ? err.message : 'Kelime verileri yüklenemedi.');
       } finally {
         setLoading(false);
       }
@@ -129,6 +131,18 @@ export default function App() {
       showToast('Yeni kelime başarıyla kaydedildi.');
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Kelime kaydedilemedi.');
+      throw error;
+    }
+  };
+
+  const handleUpdateWord = async (id: string, updatedData: { word: string; translation: string; sentence: string }) => {
+    try {
+      const saved = await updateWord(id, updatedData);
+      setWords((prev) => prev.map((item) => item.id === id ? saved : item));
+      showToast('Kelime güncellendi.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Kelime güncellenemedi.');
+      throw error;
     }
   };
 
@@ -300,7 +314,7 @@ export default function App() {
             {/* Kelime Ekle Button (Single '+' only!) */}
             <button
               type="button"
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={() => { setEditingWord(null); setIsAddModalOpen(true); }}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white text-xs sm:text-sm font-semibold shadow-xs hover:brightness-105 transition-all active:scale-98"
               style={{ backgroundColor: themeSettings.accentColor }}
             >
@@ -387,6 +401,7 @@ export default function App() {
                 item={item}
                 theme={themeSettings}
                 onDelete={handleDeleteWord}
+                onEdit={(word) => { setEditingWord(word); setIsAddModalOpen(true); }}
               />
             ))}
           </div>
@@ -412,7 +427,7 @@ export default function App() {
             ) : (
               <button
                 type="button"
-                onClick={() => setIsAddModalOpen(true)}
+                onClick={() => { setEditingWord(null); setIsAddModalOpen(true); }}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-xs"
                 style={{ backgroundColor: themeSettings.accentColor }}
               >
@@ -434,8 +449,10 @@ export default function App() {
       {/* Add Word Modal */}
       <AddWordModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        initialWord={editingWord}
+        onClose={() => { setIsAddModalOpen(false); setEditingWord(null); }}
         onAddWord={handleAddWord}
+        onUpdateWord={handleUpdateWord}
         accentColor={themeSettings.accentColor}
       />
 

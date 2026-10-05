@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, BookOpen, AlertCircle } from 'lucide-react';
+import { Word } from '../types';
 
 interface AddWordModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddWord: (data: { word: string; translation: string; sentence: string }) => Promise<void>;
+  onUpdateWord: (id: string, data: { word: string; translation: string; sentence: string }) => Promise<void>;
+  initialWord: Word | null;
   accentColor?: string;
 }
 
@@ -12,6 +15,8 @@ export const AddWordModal: React.FC<AddWordModalProps> = ({
   isOpen,
   onClose,
   onAddWord,
+  onUpdateWord,
+  initialWord,
   accentColor = '#0284c7',
 }) => {
   const [word, setWord] = useState('');
@@ -19,6 +24,14 @@ export const AddWordModal: React.FC<AddWordModalProps> = ({
   const [sentence, setSentence] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setWord(initialWord?.word ?? '');
+    setTranslation(initialWord?.translation ?? '');
+    setSentence(initialWord?.sentence ?? '');
+    setErrorMessage('');
+  }, [isOpen, initialWord]);
 
   if (!isOpen) return null;
 
@@ -37,11 +50,13 @@ export const AddWordModal: React.FC<AddWordModalProps> = ({
     try {
       setIsSubmitting(true);
       setErrorMessage('');
-      await onAddWord({
+      const payload = {
         word: trimmedWord,
         translation: trimmedTranslation,
         sentence: trimmedSentence,
-      });
+      };
+      if (initialWord) await onUpdateWord(initialWord.id, payload);
+      else await onAddWord(payload);
 
       // Clear form and close
       setWord('');
@@ -50,7 +65,7 @@ export const AddWordModal: React.FC<AddWordModalProps> = ({
       onClose();
     } catch (err) {
       console.error(err);
-      setErrorMessage('Kelime kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.');
+      setErrorMessage(err instanceof Error ? err.message : 'Kelime kaydedilirken bir hata oluştu.');
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +97,7 @@ export const AddWordModal: React.FC<AddWordModalProps> = ({
               <BookOpen className="w-4 h-4" />
             </div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-              Yeni Kelime Ekle
+              {initialWord ? 'Kelimeyi Düzenle' : 'Yeni Kelime Ekle'}
             </h2>
           </div>
           <button
@@ -163,7 +178,7 @@ export const AddWordModal: React.FC<AddWordModalProps> = ({
               className="px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all disabled:opacity-50 shadow-xs hover:brightness-105 active:scale-98"
               style={{ backgroundColor: accentColor }}
             >
-              {isSubmitting ? 'Kaydediliyor...' : 'Kelimeyi Ekle'}
+              {isSubmitting ? 'Kaydediliyor...' : initialWord ? 'Değişiklikleri Kaydet' : 'Kelimeyi Ekle'}
             </button>
           </div>
         </form>

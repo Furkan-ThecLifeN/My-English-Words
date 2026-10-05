@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Word, ThemeSettings } from '../types';
-import { ChevronDown, ChevronUp, Trash2, RotateCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trash2, RotateCw, Pencil } from 'lucide-react';
 import {
   getCardFrontStyle,
   getCardBackStyle,
@@ -12,9 +12,10 @@ interface WordCardProps {
   item: Word;
   theme: ThemeSettings;
   onDelete?: (id: string) => void;
+  onEdit?: (word: Word) => void;
 }
 
-export const WordCard: React.FC<WordCardProps> = ({ item, theme, onDelete }) => {
+export const WordCard: React.FC<WordCardProps> = ({ item, theme, onDelete, onEdit }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showSentence, setShowSentence] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -84,20 +85,34 @@ export const WordCard: React.FC<WordCardProps> = ({ item, theme, onDelete }) => 
                 EN
               </span>
 
-              {onDelete && (
-                <button
-                  type="button"
-                  onClick={handleDeleteClick}
-                  title={showDeleteConfirm ? 'Silmek için tekrar tıkla' : 'Kelimeyi sil'}
-                  className={`p-1 rounded-md transition-colors ${
-                    showDeleteConfirm
-                      ? 'bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400'
-                      : 'text-slate-300 hover:text-rose-500'
-                  }`}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              )}
+              <div className="flex items-center gap-1">
+                {onEdit && (
+                  <button
+                    type="button"
+                    onClick={(event) => { event.stopPropagation(); onEdit(item); }}
+                    title="Kelimeyi düzenle"
+                    aria-label={`${item.word} kelimesini düzenle`}
+                    className="p-1 rounded-md text-slate-300 hover:text-sky-600 transition-colors"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteClick}
+                    title={showDeleteConfirm ? 'Silmek için tekrar tıkla' : 'Kelimeyi sil'}
+                    aria-label={`${item.word} kelimesini sil`}
+                    className={`p-1 rounded-md transition-colors ${
+                      showDeleteConfirm
+                        ? 'bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400'
+                        : 'text-slate-300 hover:text-rose-500'
+                    }`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Center: English Word */}
